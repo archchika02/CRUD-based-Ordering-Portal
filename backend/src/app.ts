@@ -1,5 +1,4 @@
-import express, { Application, Request, Response } from 'express';
-import cors from 'cors';
+import orderRoutes from './routes/orderRoutes';
 
 /**
  * Express Application Instance
@@ -20,10 +19,7 @@ app.get('/api', (req: Request, res: Response) => {
   });
 });
 
-/**
- * Placeholder for future routes
- * (Will include Phase 5 CRUD implementation)
- */
-// app.use('/api/orders', orderRoutes);
+// Mounted Business Routes
+app.use('/api/orders', orderRoutes);
 
 export default app;
