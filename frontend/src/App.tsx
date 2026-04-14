@@ -1,66 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/global.css';
 import { Order, CreateOrderInput } from './types/order';
 import OrderForm from './features/orders/components/OrderForm';
 import OrderList from './features/orders/components/OrderList';
+import { api } from './services/api';
 
 /**
  * Main Application Component - Corporate Ordering Portal
  * Implements a Dashboard-style layout for professional order management
  */
 function App() {
-  // In-memory state for orders
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: 'ORD-1024',
-      customerName: 'Alice Smith',
-      customerEmail: 'alice@example.com',
-      customerContact: '+94 77 123 4567',
-      item: 'MacBook Pro 14"',
-      category: 'Electronics',
-      price: 199999,
-      quantity: 1,
-      totalAmount: 199999,
-      shippingAddress: 'No. 42, Galle Road, Colombo 03, Sri Lanka',
-      status: 'Shipped',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 'ORD-1025',
-      customerName: 'John Miller',
-      customerEmail: 'john.m@provider.net',
-      customerContact: '+94 71 987 6543',
-      item: 'Ergonomic Desk',
-      category: 'Furniture',
-      price: 45000,
-      quantity: 2,
-      totalAmount: 90000,
-      shippingAddress: '158/A, Kandy Road, Kiribathgoda, Sri Lanka',
-      status: 'Processing',
-      createdAt: new Date().toISOString(),
-    },
-  ]);
-
+  // Application State
+  const [orders, setOrders] = useState<Order[]>([]);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Initial Data Fetch
+   * Retrieves the order registry from the backend on mount
+   */
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        setLoading(true);
+        const data = await api.fetchOrders();
+        setOrders(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load order registry. Please ensure the backend server is running.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, []);
 
   // Stats calculation for the dashboard overview
   const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
   const activeOrders = orders.filter(o => o.status === 'Processing' || o.status === 'Shipped').length;
 
-  const handleCreateOrUpdate = (input: CreateOrderInput) => {
-    const totalAmount = input.price * input.quantity;
-
-    if (editingOrder) {
-      setOrders(orders.map(o => o.id === editingOrder.id ? { ...o, ...input, totalAmount } : o));
-      setEditingOrder(null);
-    } else {
-      const newOrder: Order = {
-        ...input,
-        id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-        totalAmount,
-        createdAt: new Date().toISOString(),
-      };
-      setOrders([...orders, newOrder]);
+  /**
+   * Create or Update Handler
+   * Communicates with the backend and synchronizes local state on success
+   */
+  const handleCreateOrUpdate = async (input: CreateOrderInput) => {
+    try {
+      if (editingOrder) {
+        // Update existing record
+        const updated = await api.updateOrder(editingOrder.id, input);
+        setOrders(orders.map(o => o.id === editingOrder.id ? updated : o));
+        setEditingOrder(null);
+      } else {
+        // Create new record
+        const created = await api.createOrder(input);
+        setOrders(prev => [...prev, created]);
+      }
+    } catch (err) {
+      alert('Error saving order. Please check your connection.');
+      console.error(err);
     }
   };
 
@@ -69,11 +69,25 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (id: string) => {
+  /**
+   * Delete Handler
+   * Permanently removes a record after user confirmation
+   */
+  const handleDelete = async (id: string) => {
     if (window.confirm(`Confirm deletion of record ${id}?`)) {
-      setOrders(orders.filter(o => o.id !== id));
+      try {
+        await api.deleteOrder(id);
+        setOrders(orders.filter(o => o.id !== id));
+      } catch (err) {
+        alert('Could not delete the order. It may have already been removed.');
+        console.error(err);
+      }
     }
   };
+
+  // Loading and Error UI Overlays
+  if (loading) return <div className="app-status-message">Connecting to database...</div>;
+  if (error) return <div className="app-status-message error">{error}</div>;
 
   return (
     <div className="app-container">
