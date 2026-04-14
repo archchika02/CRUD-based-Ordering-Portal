@@ -10,14 +10,30 @@ interface OrderListProps {
 }
 
 const OrderList: React.FC<OrderListProps> = ({ orders, onEdit, onDelete }) => {
-  // Return empty state if no data is present
   if (orders.length === 0) {
     return (
-      <div className="no-orders">
-        <p>No orders currently registered in the portal.</p>
+      <div className="no-orders text-muted">
+        <p>No orders currently registered in the database.</p>
       </div>
     );
   }
+
+  /**
+   * Date Formatting Helper
+   * Converts ISO strings to dd/mm/yyyy format for standard display
+   */
+  const formatDate = (isoString?: string) => {
+    if (!isoString) return 'TBD';
+    
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return 'TBD';
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <div className="order-list-container">
@@ -26,17 +42,17 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onEdit, onDelete }) => {
         <span className="count-badge">{orders.length} Total Orders</span>
       </div>
       
-      <div className="table-wrapper">
+      <div className="table-wrapper high-density">
         <table className="order-table">
           <thead>
             <tr>
               <th>ID</th>
+              <th>Placed</th>
               <th>Customer Information</th>
               <th>Shipping Address</th>
               <th>Product</th>
               <th>Category</th>
-              <th>Price</th>
-              <th>Qty</th>
+              <th>Est. Ship</th>
               <th>Total</th>
               <th>Status</th>
               <th>Actions</th>
@@ -47,13 +63,15 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onEdit, onDelete }) => {
               <tr key={order.id}>
                 {/* Order Identity */}
                 <td className="id-cell">{order.id}</td>
+
+                {/* Placed Date */}
+                <td className="date-cell">{formatDate(order.createdAt)}</td>
                 
-                {/* Customer Details - Reordered hierarchy */}
+                {/* Customer Details */}
                 <td>
                   <div className="customer-info">
                     <span className="customer-name">{order.customerName}</span>
                     <span className="customer-contact">{order.customerContact}</span>
-                    <span className="customer-email">{order.customerEmail}</span>
                   </div>
                 </td>
 
@@ -65,10 +83,11 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onEdit, onDelete }) => {
                 {/* Product Details */}
                 <td>{order.item}</td>
                 <td><span className="category-tag">{order.category}</span></td>
+
+                {/* Estimated Delivery */}
+                <td className="date-cell highlight">{formatDate(order.estimatedShippingDate)}</td>
                 
-                {/* Financials - Currency updated to Rs. */}
-                <td className="price-cell">Rs. {order.price.toLocaleString()}</td>
-                <td>{order.quantity}</td>
+                {/* Financials */}
                 <td className="total-cell">Rs. {order.totalAmount.toLocaleString()}</td>
                 
                 {/* Status Indicator */}
@@ -83,14 +102,12 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onEdit, onDelete }) => {
                   <button 
                     onClick={() => onEdit(order)} 
                     className="btn-edit"
-                    aria-label="Edit Order"
                   >
                     Edit
                   </button>
                   <button 
                     onClick={() => onDelete(order.id)} 
                     className="btn-delete"
-                    aria-label="Delete Order"
                   >
                     Delete
                   </button>

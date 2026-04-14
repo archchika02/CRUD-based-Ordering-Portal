@@ -22,13 +22,14 @@ export interface Order {
   shippingAddress: string; // Full destination address
   status: OrderStatus;     // Current fulfillment status
   createdAt: string;       // ISO timestamp of record creation
+  estimatedShippingDate: string; // ISO timestamp of predicted dispatch
 }
 
 /**
  * Data required to create a new order
- * (Calculated fields like ID and totals are managed by the system)
+ * (Calculated fields like ID, timestamps, and totals are managed by the system)
  */
-export type CreateOrderInput = Omit<Order, 'id' | 'createdAt' | 'totalAmount'>;
+export type CreateOrderInput = Omit<Order, 'id' | 'createdAt' | 'totalAmount' | 'estimatedShippingDate'>;
 
 /**
  * Data allowed for updating an existing order

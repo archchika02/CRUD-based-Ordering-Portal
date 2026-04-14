@@ -16,8 +16,9 @@ export interface Order {
   shippingAddress: string; // Destination for delivery
   status: OrderStatus;    // Current stage in the fulfillment cycle
   createdAt: string;      // ISO timestamp of creation
+  estimatedShippingDate: string; // Estimated date for shipping
 }
 
 // Input types for creation and updates
-export type CreateOrderInput = Omit<Order, 'id' | 'createdAt' | 'totalAmount'>;
+export type CreateOrderInput = Omit<Order, 'id' | 'createdAt' | 'totalAmount' | 'estimatedShippingDate'>;
 export type UpdateOrderInput = Partial<CreateOrderInput>;

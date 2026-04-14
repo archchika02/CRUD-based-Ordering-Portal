@@ -35,3 +35,8 @@ coverage/
 # Misc
 .cache/
 .eslintcache
+
+# Database
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
