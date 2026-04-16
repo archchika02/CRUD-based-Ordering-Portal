@@ -83,7 +83,7 @@ export const updateOrder = (req: Request, res: Response) => {
 
     // Merge updates and recalculate total if necessary
     const updatedData = { ...order, ...updates };
-    updatedData.totalAmount = updatedData.price * updatedData.quantity;
+    updatedData.totalAmount = calculateTotal(updatedData.price, updatedData.quantity);
 
     const updateStmt = db.prepare(`
       UPDATE orders SET 

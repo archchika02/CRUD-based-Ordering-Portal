@@ -21,11 +21,6 @@ Follow the AAA pattern for readable tests:
 2. **Act**: Execute the function or logic under test.
 3. **Assert**: Verify that the result matches your expectation.
 
-### Component Testing
-Focus on testing **User Behavior** rather than implementation details:
-- *Bad*: Testing if `state.isVisible` is true.
-- *Good*: Testing if the "Order Registry" heading is visible on the screen.
-
 ## 4. Running Tests
 ### Frontend
 ```bash
@@ -46,8 +41,6 @@ npx vitest run
 ---
 
 ## 6. Verification Evidence
-> [!TIP]
-> Including screenshots of passing test suites is a professional way to document the "Definition of Done" for a feature.
 
 ### Backend Test Results
 ![Backend Test Results Placeholder](./docs/images/backend-tests.png)
