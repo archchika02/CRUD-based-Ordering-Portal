@@ -1,7 +1,6 @@
-// This is the Order List component
-// Renders a data table showing all current orders
 import React from 'react';
 import { Order } from '../../../types/order';
+import { formatDate } from '../../../utils/dateUtils';
 
 interface OrderListProps {
   orders: Order[];
@@ -17,23 +16,6 @@ const OrderList: React.FC<OrderListProps> = ({ orders, onEdit, onDelete }) => {
       </div>
     );
   }
-
-  /**
-   * Date Formatting Helper
-   * Converts ISO strings to dd/mm/yyyy format for standard display
-   */
-  const formatDate = (isoString?: string) => {
-    if (!isoString) return 'TBD';
-    
-    const date = new Date(isoString);
-    if (isNaN(date.getTime())) return 'TBD';
-
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-
-    return `${day}/${month}/${year}`;
-  };
 
   return (
     <div className="order-list-container">

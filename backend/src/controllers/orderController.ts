@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import db from '../data/db';
 import { CreateOrderInput, UpdateOrderInput, Order } from '../../../shared/order';
+import { calculateTotal, estimateShippingDate } from '../utils/orderUtils';
 
 /**
  * Controller for handling Order-related requests
@@ -40,10 +41,11 @@ export const createOrder = (req: Request, res: Response) => {
   }
 
   const id = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-  const totalAmount = input.price * input.quantity;
   const createdAt = new Date().toISOString();
-  // Automatic shipping estimation (3 days from now)
-  const estimatedShippingDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+  
+  // Use utilities for consistent logic
+  const totalAmount = calculateTotal(input.price, input.quantity);
+  const estimatedShippingDate = estimateShippingDate(createdAt);
 
   try {
     const insert = db.prepare(`
